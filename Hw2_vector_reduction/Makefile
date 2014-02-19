@@ -63,7 +63,7 @@ vector_reduction_gold.o : $(CCFILES)
 	g++ -c $(CCFILES)
 
 clean :
-	rm ./bin/main ./bin/maker $(OBJ) 
+	rm ./bin/main ./bin $(OBJ) 
 
 
 
