@@ -42,23 +42,26 @@
 # Add source files here
 EXECUTABLE	:= matrixmul
 # Cuda source files (compiled with cudacc)
-CUFILES		:= matrixmul.cu
+CUFILES		:= $(wildcard ./src/*.cu)
 # C/C++ source files (compiled with gcc / c++)
-CCFILES		:= matrixmul_gold.cpp matrixmul_kernel.cu
+CCFILES		:= ./src/matrixmul_gold.cpp
 # OBJ
-OBJ 		:= matrixmul.o matrixmul_gold.o
+OBJ   		:= $(CUOBJ) $(CCOBJ)
+CUOBJ 		:= matrixmul.o
+CCOBJ		:= matrixmul_gold.o
 ################################################################################
 # Rules and targets
 
 
-matrixmul : $(OBJ)
-	g++ -o matrixmul $(OBJ) -lcudart -L/usr/local/cuda/lib
+matrixmul : $(CUOBJ) $(CCOBJ)
+	g++ -o ./bin/matrixmul $(CUOBJ) $(CCOBJ) -lcudart -L/usr/local/cuda/lib
 
-matrixmul.o : $(CUFILES)
-	nvcc -c $(CUFILES) 
 
-matrixmul_gold.o : $(CCFILES)
+$(CCOBJ) : $(CCFILES)
 	g++ -c $(CCFILES)
 
+ 
+$(CUOBJ) : $(CUFILES)
+	nvcc -c $(CUFILES) 
 
 	 
