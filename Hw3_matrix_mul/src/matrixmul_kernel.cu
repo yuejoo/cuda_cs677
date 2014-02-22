@@ -9,7 +9,7 @@
  * This software and the information contained herein is PROPRIETARY and 
  * CONFIDENTIAL to NVIDIA and is being provided under the terms and 
  * conditions of a Non-Disclosure Agreement.  Any reproduction or 
- * disclosure to any third party without the express written consent of 
+ * disclosure to any third parthreadIdx.y without the express written consent of 
  * NVIDIA is prohibited.     
  *
  * NVIDIA MAKES NO REPRESENTATION ABOUT THE SUITABILITY OF THIS SOURCE 
@@ -46,7 +46,7 @@
 #define BLOCK_WIDTH 16
 
 ///////////////////////////////////////////////////////////////////////////////
-//! Simple test kernel for device functionality
+//! Simple test kernel for device functionalithreadIdx.y
 //! @param g_idata  input data in global memory
 //! @param g_odata  output data in global memory
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,32 +56,28 @@ __global__ void MatrixMulKernel(Matrix M, Matrix N, Matrix P, int M_row, int N_c
 	__shared__ float Mds[TILE_WIDTH][TILE_WIDTH];
 	__shared__ float Nds[TILE_WIDTH][TILE_WIDTH];
 	
-	
-	int tx = threadIdx.x; int ty = threadIdx.y; 
-	int bx = blockIdx.x; int by = blockIdx.y;
-
-	int col = bx * TILE_WIDTH + tx;
-	int row = by * TILE_WIDTH + ty;
+	int col = blockIdx.x * TILE_WIDTH + threadIdx.x;
+	int row = blockIdx.y * TILE_WIDTH + threadIdx.y;
 	float pvalue = 0;
 	
-	int num_tile =1 +((width-1) >> 4) ;  // Shift the Tile 
+	int num_tile =1 +((width-1)>>4) ;  // Shift the Tile 
 	for(int i=0; i < num_tile; i++)
 	{
-		if( TILE_WIDTH*i + tx < width && row < M_row )  // Make Sure Mds and Nds in the Valid Area
+		if( TILE_WIDTH*i + threadIdx.x < width && row < M_row )  // Make Sure Mds and Nds in the Valid Area
 
-			Mds[ty][tx] = M.elements[ row * width  +tx+ i*TILE_WIDTH];
+			Mds[threadIdx.y][threadIdx.x] = M.elements[ row * width  +threadIdx.x+ i*TILE_WIDTH];
 		else					
-			Mds[ty][tx] = 0;  // divergence happens
+			Mds[threadIdx.y][threadIdx.x] = 0;  // divergence happens
 	
-		if( TILE_WIDTH * i + ty < width && col < N_col )
-			Nds[ty][tx] = N.elements[(ty+i*TILE_WIDTH)* N_col +col];
+		if( TILE_WIDTH * i + threadIdx.y < width && col < N_col )
+			Nds[threadIdx.y][threadIdx.x] = N.elements[(threadIdx.y+i*TILE_WIDTH)* N_col +col];
 		else
-			Nds[ty][tx] = 0;
+			Nds[threadIdx.y][threadIdx.x] = 0;
 
 		__syncthreads();
 
 		for(int k=0; k < TILE_WIDTH ; k++)
-			pvalue += Mds[ty][k]*Nds[k][tx];
+			pvalue += Mds[threadIdx.y][k]*Nds[k][threadIdx.x];
 		__syncthreads();
 	}
    	if(col<N_col && row<M_row)   // make sure [row,col] is in the valid area, divergence happens 
