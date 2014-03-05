@@ -81,7 +81,7 @@ __global__ void MatrixMulKernel(Matrix M, Matrix N, Matrix P, int M_row, int N_c
 		__syncthreads();
 	}
    	if(col<N_col && row<M_row)   // make sure [row,col] is in the valid area, divergence happens 
-		P.elements[col+row*N_col] = pvalue;
+		P.elements[col+row*N_col] = pvalue +1;
 	
 }
 

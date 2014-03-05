@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 	if(argc != 5 && argc != 4) 
 	{
 		// Allocate and initialize the matrices
-		int size=1024;
+		int size=1033;
 		M  = AllocateMatrix(rand() % size, rand() % size, 1);
 		N  = AllocateMatrix(M.width, rand() % size, 1);
 		P  = AllocateMatrix(M.height, N.width, 0);
